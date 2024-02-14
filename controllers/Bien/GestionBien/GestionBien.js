@@ -81,17 +81,15 @@ exports.getAllBien = async (req, res, next) => {
         filters.status =  req.query.status;
     }
 
-    if (req.query.typeBien && req.query.superficie) {
-        const regexTypeBien = new RegExp(req.query.typeBien, 'i');
-        const regexSuperficie = new RegExp(req.query.superficie, 'i');
-        filters.caracteristiques = { $regex: regexTypeBien };
-        filters.superficie = { $regex: regexSuperficie };
-    } else if (req.query.typeBien) {
-        const regex = new RegExp(req.query.typeBien, 'i');
-        filters.caracteristiques = { $regex: regex };
-    } else if (req.query.superficie) {
-        const regex = new RegExp(req.query.superficie, 'i');
-        filters.superficie = { $regex: regex };
+    const caracteristiques = [];
+    if (req.query.typeBien) {
+        const typeBien = req.query.typeBien.toLowerCase();
+        caracteristiques.push(new RegExp(typeBien, 'i'));
+    }
+
+    // Si des caractéristiques ont été ajoutées, les ajouter aux filtres
+    if (caracteristiques.length > 0) {
+        filters.caracteristiques = { $all: caracteristiques };
     }
 
     if (req.query.budgets) {
@@ -112,9 +110,19 @@ exports.getAllBien = async (req, res, next) => {
                 .select('-__v -dateCrea -_id'),
             BienModel.countDocuments({ ...filters }).exec(),
         ]);
+
+        const biensFiltreSuperficie = [];
+        const superficie = req.query.superficie;
+        if(superficie){
+            for(const bien of biens){
+                if(parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
+                    biensFiltreSuperficie.push(bien);
+                }
+            }
+        }
     
-        const hasMore = (page * pageSize) < totalNumberOfBiens;
-        res.status(200).json({ biens, hasMore });
+        const hasMore = superficie ? (page * pageSize) < biensFiltreSuperficie.length : (page * pageSize) < totalNumberOfBiens;
+        res.status(200).json({ biens : superficie ? biensFiltreSuperficie : biens, hasMore });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erreur lors de la récupération des biens' });
