@@ -55,6 +55,7 @@ exports.getBien = async (req, res, next) =>{
 exports.getAllBien = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
+    const getAdmin = req.query.getAdmin;
 
     if (page <= 0 || pageSize <= 0) {
         return res.status(400).json({ error: 'Mauvaise demande de pagination' });
@@ -103,7 +104,7 @@ exports.getAllBien = async (req, res, next) => {
 
     try {
         const [biens, totalNumberOfBiens] = await Promise.all([
-            BienModel.find({...filters })
+            BienModel.find({ status: { $nin: getAdmin ? null : "non-disponible" }, ...filters })
                 .sort({ _id: ordreTri })
                 .skip(skip)
                 .limit(pageSize)

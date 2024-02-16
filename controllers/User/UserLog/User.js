@@ -53,19 +53,19 @@ exports.tk_log = async (req, res, next) => {
 // ajout d'un avis client
 exports.addReview = async (req, res, next) => {
   const dataBody = {...req.body};
-  const file = req?.file;
-  let result;
+  // const file = req?.file;
+  // let result;
 
-  if(file){
-    const codeUnique = generateRandomCode();
-    result = await uploadFile(file, 'userAvis', codeUnique);
-    await unlink(file.path);
-  }
+  // if(file){
+  //   const codeUnique = generateRandomCode();
+  //   result = await uploadFile(file, 'userAvis', codeUnique);
+  //   await unlink(file.path);
+  // }
 
   try {
     const newAvis = new UserAvisModel({
       ...dataBody,
-      urlImage : result?.key ? result.key : null
+      // urlImage : result?.key ? result.key : null
     })
 
     await newAvis.save();

@@ -8,7 +8,7 @@ const options = { year: 'numeric', month: 'short' };
 const dateDeCrea = currentDate.toLocaleDateString('fr-FR', options);
 
 const bienSchema = mongoose.Schema({ 
-    status: {type: String, required: true, default: "disponible"},
+    status: {type: String, required: true, default: "non-disponible"},
     ref: {type: String, required: true},
     title: {type: String},
     histoire : {type: String, required: true},
