@@ -112,18 +112,37 @@ exports.getAllBien = async (req, res, next) => {
             BienModel.countDocuments({ ...filters }).exec(),
         ]);
 
-        const biensFiltreSuperficie = [];
         const superficie = req.query.superficie;
-        if(superficie){
+        const getAllBienForUser = [];
+        if(!getAdmin){
             for(const bien of biens){
-                if(parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
-                    biensFiltreSuperficie.push(bien);
+                if(superficie){
+                    if(bien.status === "disponible" && parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
+                        getAllBienForUser.unshift(bien);
+                    } else if (parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
+                        getAllBienForUser.push(bien);
+                    }
+                } else{
+                    if(bien.status === "disponible"){
+                        getAllBienForUser.unshift(bien);
+                    }else{
+                        getAllBienForUser.push(bien);
+                    }
                 }
             }
         }
+
+        // const biensFiltreSuperficie = [];
+        // if(superficie){
+        //     for(const bien of biens){
+        //         if(parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
+        //             biensFiltreSuperficie.push(bien);
+        //         }
+        //     }
+        // }
     
-        const hasMore = superficie ? (page * pageSize) < biensFiltreSuperficie.length : (page * pageSize) < totalNumberOfBiens;
-        res.status(200).json({ biens : superficie ? biensFiltreSuperficie : biens, hasMore });
+        const hasMore = !getAdmin ? (page * pageSize) < getAllBienForUser.length : (page * pageSize) < totalNumberOfBiens;
+        res.status(200).json({ biens : !getAdmin ? getAllBienForUser : biens, hasMore });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erreur lors de la récupération des biens' });
