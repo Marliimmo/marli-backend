@@ -117,17 +117,19 @@ exports.getAllBien = async (req, res, next) => {
         if(!getAdmin){
             for(const bien of biens){
                 if(superficie){
-                    if(bien.status === "disponible" && parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
-                        getAllBienForUser.unshift(bien);
-                    } else if (parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
+                    // if(bien.status === "disponible" && parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
+                    //     getAllBienForUser.unshift(bien);
+                    // } else 
+                    if (parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
                         getAllBienForUser.push(bien);
                     }
                 } else{
-                    if(bien.status === "disponible"){
-                        getAllBienForUser.unshift(bien);
-                    }else{
+                    // if(bien.status === "disponible"){
+                    //     getAllBienForUser.unshift(bien);
+                    // }
+                    // else{
                         getAllBienForUser.push(bien);
-                    }
+                    // }
                 }
             }
         }
@@ -141,7 +143,7 @@ exports.getAllBien = async (req, res, next) => {
         //     }
         // }
     
-        const hasMore = !getAdmin ? (page * pageSize) < getAllBienForUser.length : (page * pageSize) < totalNumberOfBiens;
+        const hasMore = (page * pageSize) < totalNumberOfBiens;
         res.status(200).json({ biens : !getAdmin ? getAllBienForUser : biens, hasMore });
     } catch (err) {
         console.error(err);
