@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 function reviewUserNotif ( pseudo, stars, description){
     return new Promise((resolve, reject)=>{
         var transporter = nodemailer.createTransport({
-            host: 'mail69.lwspanel.com',
+            host: 'mail54.lwspanel.com',
             port: 465,
             secure: true,
             auth:{
@@ -14,7 +14,7 @@ function reviewUserNotif ( pseudo, stars, description){
             }
         })
         const mail_configs = {
-            from: '"Marli - Passeur d\'histoire immobilières" <support@erzaconnect.com>',
+            from: '"Marli - Passeur d\'histoire immobilières" <support@marli-immobilier.com>',
             to: `${process.env.EMAIL_ADMIN}`,
             subject: `Nouveau avis client`,
             html: `

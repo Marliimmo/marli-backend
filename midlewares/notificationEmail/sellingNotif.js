@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 function sellingUser ( localisation, typeBien, superficie, pieces, name, email, phone, message){
     return new Promise((resolve, reject)=>{
         var transporter = nodemailer.createTransport({
-            host: 'mail69.lwspanel.com',
+            host: 'mail54.lwspanel.com',
             port: 465,
             secure: true,
             auth:{
@@ -14,7 +14,7 @@ function sellingUser ( localisation, typeBien, superficie, pieces, name, email, 
             }
         })
         const mail_configs = {
-            from: '"Marli - Passeur d\'histoire immobilières" <support@erzaconnect.com>',
+            from: '"Marli - Passeur d\'histoire immobilières" <support@marli-immobilier.com>',
             to: `${process.env.EMAIL_ADMIN}`,
             subject: `Vente d'un bien`,
             html: `
@@ -45,7 +45,7 @@ function sellingUser ( localisation, typeBien, superficie, pieces, name, email, 
 function notifForUserSelling (email, name) {
     return new Promise((resolve, reject)=>{
         var transporter = nodemailer.createTransport({
-            host: 'mail69.lwspanel.com',
+            host: 'mail54.lwspanel.com',
             port: 465,
             secure: true,
             auth:{
@@ -54,7 +54,7 @@ function notifForUserSelling (email, name) {
             }
         })
         const mail_configs = {
-            from: '"Marli - Passeur d\'histoire immobilières" <support@erzaconnect.com>',
+            from: '"Marli - Passeur d\'histoire immobilières" <support@marli-immobilier.com>',
             to: email,
             subject: "no-reply",
             html: `
