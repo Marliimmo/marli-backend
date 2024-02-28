@@ -29,11 +29,11 @@ app.use(express.json());
 
 // Gestion du cors (requêtte depuis des url inconnue);
 const cors = require('cors');
-// const corsOptions = {
-//   origin: 'https://full-analytics.com' 
-// };
+const corsOptions = {
+  origin: ['https://choosews.com/marli', 'https://marli-immobilier.com'] 
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use('/user', [userRouteur]);
 app.use('/bien', [bienRouteur, imagesBienRouteur]);
