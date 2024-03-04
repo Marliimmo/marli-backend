@@ -30,7 +30,7 @@ app.use(express.json());
 // Gestion du cors (requêtte depuis des url inconnue);
 const cors = require('cors');
 const corsOptions = {
-  origin: ['https://choosews.com/marli', 'https://marli-immobilier.com', 'https://choosews.com/dashboard'] 
+  origin: ['https://choosews.com', 'https://choosews.com/marli', 'https://marli-immobilier.com', 'https://choosews.com/dashboard'] 
 };
 
 // app.use(cors());
