@@ -106,45 +106,35 @@ exports.getAllBien = async (req, res, next) => {
         const [biens, totalNumberOfBiens] = await Promise.all([
             BienModel.find({ status: { $nin: getAdmin ? null : "non-disponible" }, ...filters })
                 .sort({ _id: ordreTri })
-                .skip(skip)
-                .limit(pageSize)
                 .select('-__v -dateCrea -_id'),
             BienModel.countDocuments({ ...filters }).exec(),
         ]);
+    
+        // Trier manuellement les biens
+        const biensAvecIndex = await biens.filter(bien => bien.index > 0).sort((a, b) => a.index - b.index);
+        const biensSansIndex = await biens.filter(bien => bien.index === 0);
+        const sortedBiens = [...biensAvecIndex, ...biensSansIndex];
+    
+        // Appliquer la pagination sur les résultats triés manuellement
+        const paginatedBiens = sortedBiens.slice(skip, skip + pageSize);
 
         const superficie = req.query.superficie;
         const getAllBienForUser = [];
         if(!getAdmin){
-            for(const bien of biens){
+            // for(const bien of biens){
+            for(const bien of paginatedBiens){
                 if(superficie){
-                    // if(bien.status === "disponible" && parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
-                    //     getAllBienForUser.unshift(bien);
-                    // } else 
                     if (parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
                         getAllBienForUser.push(bien);
                     }
                 } else{
-                    // if(bien.status === "disponible"){
-                    //     getAllBienForUser.unshift(bien);
-                    // }
-                    // else{
-                        getAllBienForUser.push(bien);
-                    // }
+                    getAllBienForUser.push(bien);
                 }
             }
         }
-
-        // const biensFiltreSuperficie = [];
-        // if(superficie){
-        //     for(const bien of biens){
-        //         if(parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
-        //             biensFiltreSuperficie.push(bien);
-        //         }
-        //     }
-        // }
     
         const hasMore = (page * pageSize) < totalNumberOfBiens;
-        res.status(200).json({ biens : !getAdmin ? getAllBienForUser : biens, hasMore });
+        res.status(200).json({ biens : !getAdmin ? getAllBienForUser : paginatedBiens, hasMore });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erreur lors de la récupération des biens' });

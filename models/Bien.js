@@ -11,6 +11,7 @@ const bienSchema = mongoose.Schema({
     status: {type: String, required: true, default: "non-disponible"},
     ref: {type: String, required: true},
     title: {type: String},
+    index: {type: Number, default: 0},
     histoire : {type: String, required: true},
     localisation: {type: String, required: true},
     prix: {type: Number, required: true},
