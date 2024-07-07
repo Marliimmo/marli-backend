@@ -1,5 +1,6 @@
 const BienModel = require("../../../models/Bien");
 const crypto = require('crypto');
+const { deleteFile } = require("../../../midlewares/aws-s3-config/aws-config");
 
 // Création d'un code aléatoire unique 
 const generateRandomCode = () => {
@@ -159,5 +160,50 @@ exports.updateBien = async (req, res, next) =>{
         return res.status(200).json({message: "Bien mis a jour avec succès"});
     } catch (error) {
         return res.status(500).json({message: "Erreur serveur"})
+    }
+}
+
+exports.deleteBien = async (req, res, next) => {
+    const reference = req.query.ref;
+    try {
+        const bien = await BienModel.findOne({ ref: reference });
+        if (!bien) {
+            return res.status(404).json({ message: "Bien non trouvé" });
+        }
+
+        // Vérification que _medias existe et est un objet
+        if (!bien._medias || typeof bien._medias !== 'object') {
+            // Suppression du bien dans la base de données
+            await BienModel.deleteOne({ ref: reference });
+            return res.status(200).json({ message: "Bien supprimé avec succès" });
+        }
+
+        // Initialisation d'un tableau pour stocker toutes les URLs trouvées
+        const urlsToDelete = [];
+
+        // Parcours de chaque propriété de _medias
+        for (const key in bien._medias) {
+            if (Object.hasOwnProperty.call(bien._medias, key)) {
+                const mediaItem = bien._medias[key];
+                // Vérification que mediaItem est un objet avec une propriété 'url'
+                if (mediaItem && mediaItem.url && typeof mediaItem.url === 'string') {
+                    urlsToDelete.push(mediaItem.url);
+                }
+            }
+        }
+
+        // Suppression des images depuis le cloud AWS
+        for (const url of urlsToDelete) {
+            const key = url.split('/')[1];
+            const repertoire = url.split('/')[0];
+            await deleteFile (key, repertoire)
+        }
+
+        // Suppression du bien dans la base de données
+        await BienModel.deleteOne({ ref: reference });
+        return res.status(200).json({ message: "Bien supprimé avec succès" });
+    } catch (error) {
+        console.error('Erreur lors de la suppression du bien :', error);
+        return res.status(500).json({ message: "Erreur serveur" });
     }
 }

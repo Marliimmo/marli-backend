@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.post('/create', auth, ctrlUser.createNewBien);
 router.patch('/update', auth, ctrlUser.updateBien);
+router.delete('/delete', auth, ctrlUser.deleteBien);
 router.get('/get-one', ctrlUser.getBien);
 router.get('/all-biens', ctrlUser.getAllBien);
 
