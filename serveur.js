@@ -40,7 +40,7 @@ const corsOptions = {
     'https://marli-immobilier.com',
     'https://choosews.com/dashboard'
   ],
-  methods: 'GET,POST,PUT,DELETE',  // Méthodes autorisées
+  methods: 'GET,POST,PUT,DELETE,PATCH',  // Méthodes autorisées
   allowedHeaders: 'Content-Type,Authorization',  // En-têtes autorisés
 };
 
