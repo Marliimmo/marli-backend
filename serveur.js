@@ -33,12 +33,12 @@ app.use(express.json());
 const cors = require('cors');
 const corsOptions = {
   origin: [
-    'https://marli-dashboard.vercel.app',  // Autorise le domaine principal de ton frontend
-    'https://marli-dashboard.vercel.app/dashboard/connexion',  // Ajoute l'URL exacte de ta page de connexion si nécessaire
+    'https://marli-dashboard-three.vercel.app/',  // Autorise le domaine principal de ton frontend
+    'https://marli-dashboard-three.vercel.app/dashboard/connexion',  // Ajoute l'URL exacte de ta page de connexion si nécessaire
     'https://choosews.com',
     'https://choosews.com/marli',
     'https://marli-immobilier.com',
-    'https://choosews.com/dashboard'
+    'https://choosews.com/dashboard',
   ],
   methods: 'GET,POST,PUT,DELETE,PATCH',  // Méthodes autorisées
   allowedHeaders: 'Content-Type,Authorization',  // En-têtes autorisés
