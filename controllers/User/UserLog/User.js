@@ -88,6 +88,23 @@ exports.getReviews = async (req, res, next) => {
   }
 }
 
+exports.deleteReview = async (req, res, next) => {
+  const id = req.params.id; 
+
+  try {
+    const review = await UserAvisModel.findOne({ _id: id });
+    if (!review) {
+      return res.status(404).json({ message: "Avis non trouvé" });
+    }
+
+    await UserAvisModel.deleteOne({ _id: id });
+    return res.status(200).json({ message: "Avis supprimé avec succès" });
+  } catch (error) {
+    return res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+
+
 exports.validationReview = async (req, res, next) => {
   const status = req.query.status;
   const id = req.query.id;

@@ -14,5 +14,6 @@ router.get('/tk-log', auth, ctrlUser.tk_log);
 router.post('/add-review', ctrlUser.addReview);
 router.get('/reviews', ctrlUser.getReviews);
 router.patch('/validation-review', auth, ctrlUser.validationReview);
+router.delete('/delete-review/:id', ctrlUser.deleteReview);
 
 module.exports = router;
