@@ -63,7 +63,6 @@ exports.getAllBien = async (req, res, next) => {
     }
     const skip = (page - 1) * pageSize;
 
-    // Tri des project par ordre croissant ou decroissant
     let ordreTri = -1;
     if(req.query.triPar === "croissant"){
         ordreTri= -1;
@@ -71,10 +70,8 @@ exports.getAllBien = async (req, res, next) => {
         ordreTri = 1;
     }
 
-    // Initialisation de filtres
     const filters = {};
 
-    // Vérification des paramètres de requête pour les filtres
     if (req.query.bienId) {
         filters.ref =  req.query.bienId;
     }
@@ -89,17 +86,16 @@ exports.getAllBien = async (req, res, next) => {
         caracteristiques.push(new RegExp(typeBien, 'i'));
     }
 
-    // Si des caractéristiques ont été ajoutées, les ajouter aux filtres
     if (caracteristiques.length > 0) {
         filters.caracteristiques = { $all: caracteristiques };
     }
 
     if (req.query.budgets) {
-        filters.prix = { $lte: parseInt(req.query.budgets) }; // inférieur ou egale
+        filters.prix = { $lte: parseInt(req.query.budgets) };
     }
     
     if (req.query.localisation) {
-        const regex = new RegExp(req.query.localisation, 'i'); // 'i' pour une correspondance insensible à la casse
+        const regex = new RegExp(req.query.localisation, 'i');
         filters.localisation = { $regex: regex };
     }
 
@@ -110,19 +106,30 @@ exports.getAllBien = async (req, res, next) => {
                 .select('-__v -dateCrea -_id'),
             BienModel.countDocuments({ ...filters }).exec(),
         ]);
-    
-        // Trier manuellement les biens
-        const biensAvecIndex = await biens.filter(bien => bien.index > 0).sort((a, b) => a.index - b.index);
-        const biensSansIndex = await biens.filter(bien => bien.index === 0);
-        const sortedBiens = [...biensAvecIndex, ...biensSansIndex];
-    
-        // Appliquer la pagination sur les résultats triés manuellement
-        const paginatedBiens = sortedBiens.slice(skip, skip + pageSize);
+
+        // Trier d'abord par index (si besoin), puis par statut personnalisé
+        const biensAvecIndex = biens.filter(bien => bien.index > 0).sort((a, b) => a.index - b.index);
+        const biensSansIndex = biens.filter(bien => bien.index === 0);
+        const allSortedByIndex = [...biensAvecIndex, ...biensSansIndex];
+
+        // Tri des statuts personnalisé
+        const statusOrder = {
+            'disponible': 0,
+            'sous-compromis': 1,
+            'non-disponible': 2,
+            'vendu': 3
+        };
+
+        allSortedByIndex.sort((a, b) => {
+            return (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
+        });
+
+        const paginatedBiens = allSortedByIndex.slice(skip, skip + pageSize);
 
         const superficie = req.query.superficie;
         const getAllBienForUser = [];
+
         if(!getAdmin){
-            // for(const bien of biens){
             for(const bien of paginatedBiens){
                 if(superficie){
                     if (parseInt((bien.caracteristiques.split("#")[1].split("m")[0])) >= parseInt(superficie)){
@@ -133,7 +140,7 @@ exports.getAllBien = async (req, res, next) => {
                 }
             }
         }
-    
+
         const hasMore = (page * pageSize) < totalNumberOfBiens;
         res.status(200).json({ biens : !getAdmin ? getAllBienForUser : paginatedBiens, hasMore });
     } catch (err) {
