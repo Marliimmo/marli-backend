@@ -1,10 +1,11 @@
-// routes/pageImageRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const upload = require('../midlewares/upload');
-const controller = require('../controllers/pageImageController');
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" }); // stockage temporaire avant S3
 
-router.post('/upload', upload.single('image'), controller.uploadImage);
-router.get('/:pageName', controller.getImagePath);
+const pageImageController = require("../controllers/pageImageController");
+
+router.post("/upload", upload.single("image"), pageImageController.uploadPageImage);
+router.get("/:pageName", pageImageController.getImagePath);
 
 module.exports = router;
