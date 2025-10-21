@@ -13,8 +13,8 @@ const userRouteur = require("./routes/User/UserLog/user");
 const imagesBienRouteur = require("./routes/Bien/GestionImages/GestionImages");
 const bienRouteur = require("./routes/Bien/GestionBien/GestionBien");
 const formNotifRouteur = require("./routes/FormNotif/FormNotif");
-const pageRoutes = require("./routes/SiteConfig/pageRoutes");
-const pageImageRoutes = require('./routes/pageImageRoutes');
+// const pageRoutes = require("./routes/SiteConfig/pageRoutes");
+// const pageImageRoutes = require('./routes/pageImageRoutes');
 
 // importation et configuration de MongoDB
 const mongoose = require("mongoose");
@@ -59,8 +59,8 @@ app.use('/user', [userRouteur]);
 app.use('/bien', [bienRouteur, imagesBienRouteur]);
 app.use('/form', [formNotifRouteur]);
 app.use('/medias', express.static(path.join(__dirname, 'medias')));
-app.use('/pages', pageRoutes);
-app.use('/page-images', pageImageRoutes);
+// app.use('/pages', pageRoutes);
+// app.use('/page-images', pageImageRoutes);
 app.use('/uploads', express.static('uploads')); // pour servir les images
 
 server.listen(port, (err)=>{
