@@ -22,7 +22,7 @@ async function migrateImage(oldUrl, bienId, imageKey) {
     // Construire l'URL complète
     let fullUrl = oldUrl;
     if (!oldUrl.startsWith('http')) {
-      fullUrl = `${OLD_BACKEND_URL}${oldUrl}`;
+      fullUrl = `${OLD_BACKEND_URL}/bien/images/${oldUrl}`;
     }
     
     console.log(`   URL source: ${fullUrl}`);

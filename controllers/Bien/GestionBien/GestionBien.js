@@ -2,7 +2,7 @@ const BienModel = require("../../../models/Bien");
 const crypto = require('crypto');
 const { deleteFile } = require("../../../midlewares/aws-s3-config/aws-config");
 
-const BASE_URL = process.env.BASE_URL || 'https://marli-backend.onrender.com';
+const BASE_URL = 'https://res.cloudinary.com/dmsnf2wye/image/upload';
 
 // Fonction pour ajouter l'URL complète aux images
 const addFullUrlToImages = (bien) => {
