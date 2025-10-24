@@ -4,11 +4,14 @@ const cors = require('cors');
 const http = require('http');
 const path = require('path');
 const bodyParser = require("body-parser");
+
 const app = express();
+
 app.use(cors({
-  origin: ['https://marli-immobilier.com', 'https://marli.netlify.app', 'http://localhost:3000'],
+  origin: '*',
   credentials: true
 }));
+
 const server = http.createServer(app);
 const port = process.env.PORT || 8090;
 
