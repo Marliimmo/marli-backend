@@ -5,7 +5,6 @@ const http = require('http');
 const path = require('path');
 const bodyParser = require("body-parser");
 const app = express();
-const cors = require('cors');
 app.use(cors({
   origin: ['https://marli-immobilier.com', 'https://marli.netlify.app', 'http://localhost:3000'],
   credentials: true
