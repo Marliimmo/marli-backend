@@ -9,16 +9,7 @@ const addFullUrlToImages = (bien) => {
     if (bien._medias && typeof bien._medias === 'object') {
         for (const key in bien._medias) {
             if (bien._medias[key] && bien._medias[key].url) {
-                const url = bien._medias[key].url;
-                
-                // CORRECTION : Si l'URL est déjà complète, on ne la modifie pas
-                if (url.startsWith('http://') || url.startsWith('https://')) {
-                    // L'URL est déjà complète, on la garde telle quelle
-                    bien._medias[key].url = url;
-                } else {
-                    // L'URL est partielle, on ajoute le BASE_URL
-                    bien._medias[key].url = `${BASE_URL}/${url}`;
-                }
+                bien._medias[key].url = `${BASE_URL}/${bien._medias[key].url}`;
             }
         }
     }
