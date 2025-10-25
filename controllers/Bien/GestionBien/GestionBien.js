@@ -4,12 +4,19 @@ const { deleteFile } = require("../../../midlewares/aws-s3-config/aws-config");
 
 const BASE_URL = 'https://res.cloudinary.com/dmsnf2wye/image/upload';
 
-// Fonction pour ajouter l'URL complète aux images
+// Fonction pour ajouter l'URL complète aux images UNIQUEMENT si nécessaire
 const addFullUrlToImages = (bien) => {
     if (bien._medias && typeof bien._medias === 'object') {
         for (const key in bien._medias) {
             if (bien._medias[key] && bien._medias[key].url) {
-                bien._medias[key].url = `${BASE_URL}/${bien._medias[key].url}`;
+                const url = bien._medias[key].url;
+                
+                // Si l'URL commence déjà par http:// ou https://, on la laisse telle quelle
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    // Sinon, on ajoute le BASE_URL
+                    bien._medias[key].url = `${BASE_URL}/${url}`;
+                }
+                // Sinon l'URL est déjà complète, on ne fait rien
             }
         }
     }
