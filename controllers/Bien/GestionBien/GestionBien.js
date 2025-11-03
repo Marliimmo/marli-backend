@@ -102,7 +102,7 @@ exports.getAllBien = async (req, res, next) => {
     try {
         const [biens, totalNumberOfBiens] = await Promise.all([
             BienModel.find({ status: { $nin: getAdmin ? null : "non-disponible" }, ...filters })
-                .sort({ _id: ordreTri })
+                .sort({ dateCrea: -1, index: 1 })
                 .select('-__v -dateCrea -_id'),
             BienModel.countDocuments({ ...filters }).exec(),
         ]);
