@@ -38,6 +38,9 @@ const corsOptions = {
     'http://localhost:3000', 'http://localhost:3001/dashboard/connexion', 'http://localhost:3001',
     'https://marli-dashboard-three.vercel.app',  // Autorise le domaine principal de ton frontend
     'https://marli-dashboard-three.vercel.app/dashboard/connexion',  // Ajoute l'URL exacte de ta page de connexion si nécessaire
+    'https://marli-dashboard-x1sb.vercel.app',
+    'https://marli-dashboard-x1sb-git-main-marli-immobiliers-projects.vercel.app',
+    'https://admin.marli-immobilier.com',
     'https://marli-immobilier.com',
   ],
   methods: 'GET,POST,PUT,DELETE,PATCH',  // Méthodes autorisées
