@@ -58,6 +58,7 @@ app.use('/medias', express.static(path.join(__dirname, 'medias')));
 app.use('/pages', pageRoutes);
 app.use('/page-images', pageImageRoutes);
 app.use('/uploads', express.static('uploads')); // pour servir les images
+app.use('/imagesWanted', express.static(path.join(__dirname, 'imagesWanted')));
 
 server.listen(port, (err)=>{
   if(err) console.log(err.message)
