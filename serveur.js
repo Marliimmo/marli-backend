@@ -15,14 +15,12 @@ const bienRouteur = require("./routes/Bien/GestionBien/GestionBien");
 const formNotifRouteur = require("./routes/FormNotif/FormNotif");
 const pageRoutes = require("./routes/SiteConfig/pageRoutes");
 const pageImageRoutes = require('./routes/pageImageRoutes');
-
+const articleRouteur = require("./routes/Article/ArticleRoutes");
 // importation et configuration de MongoDB
 const mongoose = require("mongoose");
 const mongoURI = process.env.MONGODB_URI;
-
-mongoose.connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true })
+console.log('MongoDB URI:', mongoURI);
+mongoose.connect(mongoURI)
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
  
@@ -59,6 +57,7 @@ app.use('/bien', [bienRouteur, imagesBienRouteur]);
 app.use('/form', [formNotifRouteur]);
 app.use('/medias', express.static(path.join(__dirname, 'medias')));
 app.use('/pages', pageRoutes);
+app.use('/article', articleRouteur);
 app.use('/page-images', pageImageRoutes);
 app.use('/uploads', express.static('uploads')); // pour servir les images
 app.use('/imagesWanted', express.static(path.join(__dirname, 'imagesWanted')));
