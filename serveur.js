@@ -50,6 +50,8 @@ app.use(bodyParser.urlencoded({ limit: "10000mb", extended: true }));
 
 
 // app.use(cors());
+// Gestion OPTIONS pour CORS
+app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
 app.use('/user', [userRouteur]);
