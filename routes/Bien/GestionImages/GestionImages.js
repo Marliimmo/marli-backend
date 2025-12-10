@@ -14,6 +14,6 @@ router.delete('/medias/:repertoire/:key', auth, ctrlUserImages.deleteImageBien);
 router.post('/wanted-image', auth, upload.single("image"), ctrlUserImages.imageWanted);
 router.get('/get-wanteds', ctrlUserImages.getWanted);
 router.delete('/delete-wanted', auth, ctrlUserImages.deleteWanted);
-router.post('/update-multiple-images', auth, upload.array("images", 20), ctrlUserImages.updateMultipleImages);
+router.post('/update-multiple-images', upload.array("images", 20), ctrlUserImages.updateMultipleImages);
 
 module.exports = router;
