@@ -150,7 +150,29 @@ exports.getAllBien = async (req, res, next) => {
 }
 
 // mise a jour d'un bien 
-exports.updateBien = async (req, res, next) =>{
+exports.updateBien = async (req, res, next) => {
+    const reference = req.query.ref;
+    const newData = {...req.body};
+    delete newData.ref;
+    delete newData._id;
+    
+    try {
+        const bien = await BienModel.findOne({ref: reference});
+        if (!bien) {
+            return res.status(404).json({message: "Bien non trouvé"});
+        }
+        
+        // Garder _medias existant si non fourni
+        if (!newData._medias && bien._medias) {
+            newData._medias = bien._medias;
+        }
+        
+        await BienModel.updateOne({ref: reference}, {...newData});
+        return res.status(200).json({message: "Bien mis a jour avec succès"});
+    } catch (error) {
+        return res.status(500).json({message: "Erreur serveur"})
+    }
+}
     const reference = req.query.ref;
     const newData = {...req.body}
 
