@@ -6,21 +6,20 @@ const BienModel = require("../../../models/Bien");
 const WantedModel = require("../../../models/Wanted");
 const crypto = require('crypto');
 
-// Création d'un code aléatoire unique 
+// Création d'un code aléatoire unique
 const generateRandomCode = () => {
     const currentDate = new Date();
-    const milliseconds = currentDate.getMilliseconds().toString().padStart(3, "0"); // Obtenir les millisecondes actuelles et les formater sur 3 chiffres
-    const seconds = currentDate.getSeconds().toString().padStart(2, "0"); // Obtenir les secondes actuelles et les formater sur 2 chiffres
-    const randomBytes = crypto.randomBytes(3); // 3 octets pour obtenir plus de combinaisons
+    const milliseconds = currentDate.getMilliseconds().toString().padStart(3, "0");
+    const seconds = currentDate.getSeconds().toString().padStart(2, "0");
+    const randomBytes = crypto.randomBytes(3);
     const randomString = randomBytes.toString("base64");
     const randomCharacters = randomString
-        .replace(/[+/=]/g, '') // Supprimer les caractères spéciaux de base64
-        .slice(0, 6); // Garder les 6 premiers caractères
+        .replace(/[+/=]/g, '')
+        .slice(0, 6);
 
     const sixCharacterCode = randomCharacters + milliseconds + seconds;
-    return sixCharacterCode.slice(0, 6); // Garder seulement les 6 premiers caractères
+    return sixCharacterCode.slice(0, 6);
 };
-// Fin
 
 // stream de l'image
 exports.getImagesPath = async (req, res) =>{
@@ -34,19 +33,19 @@ exports.getImagesPath = async (req, res) =>{
     readStream.pipe(res);
   }
 }
-   
+
 // mise a jour d'une image d'un bien.
 exports.updateImagesBien = async (req, res) =>{
     const file = req.file;
     const index = req.query.index;
     const referenceBien = req.query.ref;
-  
+
     const result = await uploadFile(file, "imagesBienMarli", referenceBien);
     await unlink(file.path);
-  
+
     const updateKey = `_medias.image_galerie_${index}`;
     const imageUrl = result.key;
-  
+
     BienModel.findOne({ ref: referenceBien })
       .then((bien) => {
         if (bien) {
@@ -57,7 +56,7 @@ exports.updateImagesBien = async (req, res) =>{
               },
             },
           };
-  
+
           BienModel.updateOne({ ref: referenceBien }, updateQuery)
             .then(() => res.status(200).json({ message: `Image galerie index ${index} mis à jour avec succès`, imagePath : imageUrl }))
             .catch((error) => res.status(400).json({ error }));
@@ -67,7 +66,7 @@ exports.updateImagesBien = async (req, res) =>{
       })
       .catch((error) => res.status(500).json({ error }));
 }
-  
+
 // suppression d'une image d'un bien.
 exports.deleteImageBien = async (req, res) =>{
     const key = req.params.key;
@@ -75,7 +74,7 @@ exports.deleteImageBien = async (req, res) =>{
     const index = req.query.index;
     const referenceBien = req.query.ref;
     const updateKey = `_medias.image_galerie_${index}`;
-  
+
     BienModel.findOne({ ref: referenceBien })
       .then( async () => {
         const updateQuery = {
@@ -85,7 +84,7 @@ exports.deleteImageBien = async (req, res) =>{
             },
           },
         };
-  
+
         await deleteFile(key, repertoire);
         BienModel.updateOne({ref : referenceBien}, updateQuery)
           .then(() => res.status(200).json({message: `Image galerie index ${index} supprimé avec succès`}))
@@ -132,6 +131,8 @@ exports.deleteWanted = async (req, res) =>{
   WantedModel.deleteOne({_id : id})
     .then(() => res.status(200).json({message: `Image supprimé avec succès`}))
     .catch(error => res.status(401).json({error}));
+}
+
 // Upload multiple images pour galerie
 exports.updateMultipleImages = async (req, res) => {
   try {
