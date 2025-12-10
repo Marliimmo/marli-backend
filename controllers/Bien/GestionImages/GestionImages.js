@@ -132,4 +132,53 @@ exports.deleteWanted = async (req, res) =>{
   WantedModel.deleteOne({_id : id})
     .then(() => res.status(200).json({message: `Image supprimé avec succès`}))
     .catch(error => res.status(401).json({error}));
+// Upload multiple images pour galerie
+exports.updateMultipleImages = async (req, res) => {
+  try {
+    const { reference, existingImages } = req.body;
+    const files = req.files;
+
+    if (!reference) {
+      return res.status(400).json({ message: "Référence manquante" });
+    }
+
+    const bien = await BienModel.findOne({ ref: reference });
+    if (!bien) {
+      return res.status(404).json({ message: "Bien non trouvé" });
+    }
+
+    // Parse existing images
+    const existing = existingImages ? JSON.parse(existingImages) : [];
+    
+    // Upload new files
+    const uploadedUrls = [];
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const result = await uploadFile(file, "imagesBienMarli", reference);
+        await unlink(file.path);
+        uploadedUrls.push(result.key);
+      }
+    }
+
+    // Combine existing + new images
+    const allImages = [...existing, ...uploadedUrls];
+
+    // Update database
+    const updateData = {};
+    allImages.forEach((url, index) => {
+      updateData[`_medias.image_galerie_${index + 1}`] = { url };
+    });
+
+    await BienModel.updateOne({ ref: reference }, { $set: updateData });
+
+    res.status(200).json({ 
+      message: "Images enregistrées avec succès",
+      images: allImages 
+    });
+
+  } catch (error) {
+    console.error('Erreur upload:', error);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
 }
