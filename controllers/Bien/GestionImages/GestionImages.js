@@ -167,7 +167,7 @@ exports.updateMultipleImages = async (req, res) => {
     // Update database
     const updateData = {};
     allImages.forEach((url, index) => {
-      updateData[`_medias.image_galerie_${index + 1}`] = { url };
+      updateData[`_medias.image_galerie_${index}`] = { url };
     });
 
     await BienModel.updateOne({ ref: reference }, { $set: updateData });
