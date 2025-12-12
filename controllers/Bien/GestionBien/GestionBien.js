@@ -5,18 +5,17 @@ const { deleteFile } = require("../../../midlewares/aws-s3-config/aws-config");
 // Création d'un code aléatoire unique 
 const generateRandomCode = () => {
     const currentDate = new Date();
-    const milliseconds = currentDate.getMilliseconds().toString().padStart(3, "0"); // Obtenir les millisecondes actuelles et les formater sur 3 chiffres
-    const seconds = currentDate.getSeconds().toString().padStart(2, "0"); // Obtenir les secondes actuelles et les formater sur 2 chiffres
-    const randomBytes = crypto.randomBytes(3); // 3 octets pour obtenir plus de combinaisons
+    const milliseconds = currentDate.getMilliseconds().toString().padStart(3, "0");
+    const seconds = currentDate.getSeconds().toString().padStart(2, "0");
+    const randomBytes = crypto.randomBytes(3);
     const randomString = randomBytes.toString("base64");
     const randomCharacters = randomString
-        .replace(/[+/=]/g, '') // Supprimer les caractères spéciaux de base64
-        .slice(0, 6); // Garder les 6 premiers caractères
+        .replace(/[+/=]/g, '')
+        .slice(0, 6);
 
     const sixCharacterCode = randomCharacters + milliseconds + seconds;
-    return sixCharacterCode.slice(0, 6); // Garder seulement les 6 premiers caractères
+    return sixCharacterCode.slice(0, 6);
 };
-// Fin
 
 // creation d'un nouveau bien
 exports.createNewBien = async (req, res, next) =>{
@@ -107,12 +106,10 @@ exports.getAllBien = async (req, res, next) => {
             BienModel.countDocuments({ ...filters }).exec(),
         ]);
 
-        // Trier d'abord par index (si besoin), puis par statut personnalisé
         const biensAvecIndex = biens.filter(bien => bien.index > 0).sort((a, b) => a.index - b.index);
         const biensSansIndex = biens.filter(bien => bien.index === 0);
         const allSortedByIndex = [...biensAvecIndex, ...biensSansIndex];
 
-        // Tri des statuts personnalisé
         const statusOrder = {
             'disponible': 0,
             'sous-compromis': 1,
@@ -162,7 +159,6 @@ exports.updateBien = async (req, res, next) => {
             return res.status(404).json({message: "Bien non trouvé"});
         }
         
-        // Garder _medias existant si non fourni
         if (!newData._medias && bien._medias) {
             newData._medias = bien._medias;
         }
@@ -173,25 +169,8 @@ exports.updateBien = async (req, res, next) => {
         return res.status(500).json({message: "Erreur serveur"})
     }
 }
-    const reference = req.query.ref;
-    const newData = {...req.body}
 
-    delete newData.ref;
-    delete newData._id;
-
-    try {
-        const bien = await BienModel.findOne({ref: reference});
-        if(!bien){
-            return res.status(404).json({message: "Bien non trouvé"});
-        }
-
-        await BienModel.updateOne({ref: reference}, {...newData});
-        return res.status(200).json({message: "Bien mis a jour avec succès"});
-    } catch (error) {
-        return res.status(500).json({message: "Erreur serveur"})
-    }
-}
-
+// suppression d'un bien
 exports.deleteBien = async (req, res, next) => {
     const reference = req.query.ref;
     try {
@@ -200,35 +179,28 @@ exports.deleteBien = async (req, res, next) => {
             return res.status(404).json({ message: "Bien non trouvé" });
         }
 
-        // Vérification que _medias existe et est un objet
         if (!bien._medias || typeof bien._medias !== 'object') {
-            // Suppression du bien dans la base de données
             await BienModel.deleteOne({ ref: reference });
             return res.status(200).json({ message: "Bien supprimé avec succès" });
         }
 
-        // Initialisation d'un tableau pour stocker toutes les URLs trouvées
         const urlsToDelete = [];
 
-        // Parcours de chaque propriété de _medias
         for (const key in bien._medias) {
             if (Object.hasOwnProperty.call(bien._medias, key)) {
                 const mediaItem = bien._medias[key];
-                // Vérification que mediaItem est un objet avec une propriété 'url'
                 if (mediaItem && mediaItem.url && typeof mediaItem.url === 'string') {
                     urlsToDelete.push(mediaItem.url);
                 }
             }
         }
 
-        // Suppression des images depuis le cloud AWS
         for (const url of urlsToDelete) {
             const key = url.split('/')[1];
             const repertoire = url.split('/')[0];
             await deleteFile (key, repertoire)
         }
 
-        // Suppression du bien dans la base de données
         await BienModel.deleteOne({ ref: reference });
         return res.status(200).json({ message: "Bien supprimé avec succès" });
     } catch (error) {
