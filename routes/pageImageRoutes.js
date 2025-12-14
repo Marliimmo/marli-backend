@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" }); // stockage temporaire avant S3
+const upload = multer({ storage: multer.memoryStorage() }); // stockage en mémoire avant S3
 
 const pageImageController = require("../controllers/pageImageController");
 
