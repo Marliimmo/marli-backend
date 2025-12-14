@@ -33,17 +33,30 @@ app.use(express.json());
 const cors = require('cors');
 const corsOptions = {
   origin: [
-    'http://localhost:3000', 'http://localhost:3001/dashboard/connexion', 'http://localhost:3001',
-    'https://marli-dashboard-three.vercel.app',  // Autorise le domaine principal de ton frontend
-    'https://marli-dashboard-three.vercel.app/dashboard/connexion',  // Ajoute l'URL exacte de ta page de connexion si nécessaire
+    'http://localhost:3000', 
+    'http://localhost:3001',
+    'https://marli-dashboard-three.vercel.app',
     'https://marli-dashboard-x1sb.vercel.app',
-    'https://marli-dashboard-x1sb-git-main-marli-immobiliers-projects.vercel.app',
     'https://admin.marli-immobilier.com',
     'https://marli-immobilier.com',
+    'https://front-marli.vercel.app',
+    'https://marli-dashboard.vercel.app',
+    'https://marli-backend.vercel.app'
   ],
-  methods: 'GET,POST,PUT,DELETE,PATCH',  // Méthodes autorisées
-  allowedHeaders: 'Content-Type,Authorization',  // En-têtes autorisés
+  methods: 'GET,POST,PUT,DELETE,PATCH',
+  allowedHeaders: 'Content-Type,Authorization',
 };
+```
+
+**Commitez cette modification.**
+
+---
+
+## ⚡ EN ATTENDANT
+
+**Testez le FRONT maintenant :**
+```
+https://front-marli.vercel.app
 
 app.use(bodyParser.json({ limit: "10000mb" }));
 app.use(bodyParser.urlencoded({ limit: "10000mb", extended: true }));
