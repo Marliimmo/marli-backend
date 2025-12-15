@@ -8,7 +8,6 @@ const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 8090;
 
-// Importation des differentes routes
 const userRouteur = require("./routes/User/UserLog/user");
 const imagesBienRouteur = require("./routes/Bien/GestionImages/GestionImages");
 const bienRouteur = require("./routes/Bien/GestionBien/GestionBien");
@@ -17,7 +16,6 @@ const pageRoutes = require("./routes/SiteConfig/pageRoutes");
 const pageImageRoutes = require('./routes/pageImageRoutes');
 const articleRouteur = require("./routes/Article/ArticleRoutes");
 
-// importation et configuration de MongoDB
 const mongoose = require("mongoose");
 const mongoURI = process.env.MONGODB_URI;
 console.log('MongoDB URI:', mongoURI);
@@ -25,10 +23,8 @@ mongoose.connect(mongoURI)
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
-// exporte les requetes en json dans le body
 app.use(express.json());
 
-// Gestion du cors (requêtte depuis des url inconnue);
 const cors = require('cors');
 const corsOptions = {
   origin: [
@@ -39,8 +35,7 @@ const corsOptions = {
     'https://admin.marli-immobilier.com',
     'https://marli-immobilier.com',
     'https://front-marli.vercel.app',
-    'https://marli-dashboard.vercel.app',
-    'https://marli-backend.vercel.app'
+    'https://marli-dashboard.vercel.app'
   ],
   methods: 'GET,POST,PUT,DELETE,PATCH',
   allowedHeaders: 'Content-Type,Authorization',
@@ -49,7 +44,6 @@ const corsOptions = {
 app.use(bodyParser.json({ limit: "10000mb" }));
 app.use(bodyParser.urlencoded({ limit: "10000mb", extended: true }));
 
-// Gestion OPTIONS pour CORS
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
