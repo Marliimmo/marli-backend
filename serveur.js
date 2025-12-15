@@ -74,8 +74,17 @@ app.use('/medias', express.static(path.join(__dirname, 'medias')));
 app.use('/pages', pageRoutes);
 app.use('/article', articleRouteur);
 app.use('/page-images', pageImageRoutes);
-app.use('/uploads', express.static('uploads')); // pour servir les images
+app.use('/uploads', express.static('uploads'));
 app.use('/imagesWanted', express.static(path.join(__dirname, 'imagesWanted')));
 
-// Export pour Vercel serverless
-module.exports = app;
+// Pour Vercel serverless
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  // Pour Render/serveurs classiques
+  server.listen(port, (err) => {
+    if(err) console.log(err.message);
+    console.log(`Running on port ${port}`);
+  });
+}
+
