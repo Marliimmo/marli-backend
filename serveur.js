@@ -40,7 +40,19 @@ const corsOptions = {
   methods: 'GET,POST,PUT,DELETE,PATCH',
   allowedHeaders: 'Content-Type,Authorization',
 };
-
+origin: function (origin, callback) {
+  const allowed = [
+    'http://localhost:3000',
+    'https://marli-immobilier.com',
+    'https://admin.marli-immobilier.com'
+  ];
+  
+  if (!origin || allowed.includes(origin) || origin.includes('.vercel.app')) {
+    callback(null, true);
+  } else {
+    callback(new Error('Not allowed by CORS'));
+  }
+},
 app.use(bodyParser.json({ limit: "10000mb" }));
 app.use(bodyParser.urlencoded({ limit: "10000mb", extended: true }));
 
