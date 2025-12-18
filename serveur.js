@@ -14,15 +14,17 @@ const pageRoutes = require("./routes/SiteConfig/pageRoutes");
 const pageImageRoutes = require('./routes/pageImageRoutes');
 const articleRouteur = require("./routes/Article/ArticleRoutes");
 const mongoose = require("mongoose");
+
 const mongoURI = process.env.MONGODB_URI;
 console.log('MongoDB URI:', mongoURI);
+
 mongoose.connect(mongoURI)
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
 app.use(express.json());
-const cors = require('cors');
 
+const cors = require('cors');
 const corsOptions = {
   origin: function (origin, callback) {
     const allowed = [
@@ -51,6 +53,7 @@ app.use(bodyParser.json({ limit: "10000mb" }));
 app.use(bodyParser.urlencoded({ limit: "10000mb", extended: true }));
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
+
 app.use('/user', [userRouteur]);
 app.use('/bien', [bienRouteur, imagesBienRouteur]);
 app.use('/form', [formNotifRouteur]);
