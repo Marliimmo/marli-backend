@@ -30,6 +30,7 @@ const corsOptions = {
       'http://localhost:3001',
       'https://marli-dashboard-three.vercel.app',
       'https://marli-dashboard-x1sb.vercel.app',
+      'https://marli-dashboard-zeta.vercel.app'
       'https://admin.marli-immobilier.com',
       'https://marli-immobilier.com',
       'https://front-marli.vercel.app',
