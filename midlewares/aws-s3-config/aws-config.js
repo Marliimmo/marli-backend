@@ -13,24 +13,27 @@ const s3 = new S3({
     secretAccessKey
 })
 
-
 // enregistrement d'une key comme image dans aws s3
 function uploadFile (file, repertoire, pseudoUser){
-    if(repertoire !== undefined){
+    if(repertoire !== undefined && file && file.path){
+        // Vérifie que le fichier existe avant de le lire
+        if (!fs.existsSync(file.path)) {
+            throw new Error(`File not found: ${file.path}`);
+        }
+        
         const fileStream = fs.createReadStream(file.path);
-    
+        
         const uploadParams = {
             Bucket: `${bucketName}/${repertoire}`,
             Body: fileStream,
             Key: `${repertoire}_${pseudoUser}_${file.filename}`
         }
-    
+        
         return s3.upload(uploadParams).promise()
     }
-    return
+    throw new Error('Invalid file or repertoire');
 }
 exports.uploadFile = uploadFile;
-
 
 // telechargement l'image correspondate grace à la key
 async function getFileStream(fileKey, repertoire) {
@@ -40,7 +43,6 @@ async function getFileStream(fileKey, repertoire) {
                 Key: fileKey,
                 Bucket: `${bucketName}/${repertoire}`
             };
-
             await s3.headObject(downloadParams).promise();
             return s3.getObject(downloadParams).createReadStream();
         } catch (error) {
@@ -51,7 +53,6 @@ async function getFileStream(fileKey, repertoire) {
     return false;
 }
 exports.getFileStream = getFileStream;
-
 
 // suppression de l'image sur le cloud
 async function deleteFile (fileKey, repertoire){
