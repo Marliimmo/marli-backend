@@ -35,15 +35,15 @@ exports.getImagesPath = async (req, res) =>{
 }
 
 // mise a jour d'une image d'un bien.
-exports.updateImagesBien = async (req, res) =>{
-    const file = req.file;
+exports.updateImagesBien = async (req, res) => {
+    const file = req.file;  // ← CETTE LIGNE MANQUAIT !
     const index = req.query.index;
     const referenceBien = req.query.ref;
-console.log('DEBUG - file:', file);
-    console.log('DEBUG - file.path:', file?.path);
-    console.log('DEBUG - index:', index);
-    console.log('DEBUG - ref:', referenceBien);
 
+    // Vérification du fichier
+    console.log('DEBUG - file:', file);
+    console.log('DEBUG - file.path:', file?.path);
+    
     if (!file || !file.path) {
         return res.status(400).json({ error: 'Fichier manquant ou invalide' });
     }
