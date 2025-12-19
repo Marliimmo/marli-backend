@@ -1,11 +1,7 @@
 const express = require("express");
 const ctrlUserImages = require("../../../controllers/Bien/GestionImages/GestionImages");
 const auth = require("../../../midlewares/auth/auth");
-
-const multer = require("multer");
-const upload = multer({ 
-  storage: multer.memoryStorage() // ← Stockage en mémoire au lieu de disque
-});
+const upload = require("../../../midlewares/upload");
 
 const router = express.Router();
 
