@@ -39,6 +39,14 @@ exports.updateImagesBien = async (req, res) =>{
     const file = req.file;
     const index = req.query.index;
     const referenceBien = req.query.ref;
+console.log('DEBUG - file:', file);
+    console.log('DEBUG - file.path:', file?.path);
+    console.log('DEBUG - index:', index);
+    console.log('DEBUG - ref:', referenceBien);
+
+    if (!file || !file.path) {
+        return res.status(400).json({ error: 'Fichier manquant ou invalide' });
+    }
 
     const result = await uploadFile(file, "imagesBienMarli", referenceBien);
     await unlink(file.path);
