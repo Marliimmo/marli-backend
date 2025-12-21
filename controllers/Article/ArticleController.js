@@ -27,6 +27,34 @@ exports.getArticles = async (req, res) => {
   }
 }
 
+// ✅ NOUVELLE FONCTION : Modifier un article
+exports.updateArticle = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { title, excerpt, content, urlImage } = req.body
+    
+    const article = await Article.findByIdAndUpdate(
+      id,
+      { 
+        title, 
+        excerpt, 
+        content, 
+        urlImage,
+        updatedAt: Date.now()
+      },
+      { new: true } // Retourne l'article mis à jour
+    )
+    
+    if (!article) {
+      return res.status(404).json({ error: 'Article non trouvé' })
+    }
+    
+    res.status(200).json(article)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
 exports.deleteArticle = async (req, res) => {
   try {
     await Article.findByIdAndDelete(req.params.id)
