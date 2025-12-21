@@ -6,6 +6,7 @@ const auth = require('../../midlewares/auth/auth')
 
 router.post('/create', auth, articleController.createArticle)
 router.get('/get-articles', articleController.getArticles)
+router.put('/update/:id', auth, articleController.updateArticle) // ✅ NOUVELLE ROUTE
 router.delete('/delete/:id', auth, articleController.deleteArticle)
 router.post('/upload-image', auth, uploadController.uploadImage)
 
