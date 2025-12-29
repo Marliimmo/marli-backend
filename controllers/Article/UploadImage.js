@@ -9,23 +9,29 @@ cloudinary.config({
 
 exports.uploadImage = async (req, res) => {
   try {
-    // ✅ CORRECTION : Vérifier req.file au lieu de req.body.image
+    // ✅ LOGS DE DEBUG
+    console.log('=== DEBUG UPLOAD IMAGE ===')
+    console.log('req.file:', req.file)
+    console.log('req.body:', req.body)
+    console.log('=========================')
+
     if (!req.file) {
-      return res.status(400).json({ error: 'Aucune image fournie' })
+      console.error('ERREUR: req.file est undefined')
+      return res.status(400).json({ error: 'Aucune image fournie - req.file is missing' })
     }
 
-    // ✅ CORRECTION : Upload depuis le chemin du fichier temporaire
+    console.log('Upload vers Cloudinary:', req.file.path)
     const result = await cloudinary.uploader.upload(req.file.path, {
       folder: 'marli-articles',
       resource_type: 'image'
     })
 
-    // ✅ Supprimer le fichier temporaire après upload
+    console.log('Cloudinary OK:', result.secure_url)
     await unlink(req.file.path)
 
     res.status(200).json({ url: result.secure_url })
   } catch (error) {
-    console.error('Erreur upload image article:', error)
+    console.error('ERREUR uploadImage:', error)
     res.status(500).json({ error: error.message })
   }
 }
