@@ -8,6 +8,6 @@ router.post('/create', auth, articleController.createArticle)
 router.get('/get-articles', articleController.getArticles)
 router.put('/update/:id', auth, articleController.updateArticle) // ✅ NOUVELLE ROUTE
 router.delete('/delete/:id', auth, articleController.deleteArticle)
-router.post('/upload-image', auth, uploadController.uploadImage)
+router.post('/upload-image', uploadController.uploadImage)
 
 module.exports = router
