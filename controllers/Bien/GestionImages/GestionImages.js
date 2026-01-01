@@ -2,7 +2,7 @@ const fs = require("fs");
 const util = require('util');
 const unlink = util.promisify(fs.unlink);
 const { uploadFile, getFileStream, deleteFile } = require("../../../midlewares/aws-s3-config/aws-config");
-const { uploadToCloudinary } = require("../../../midlewares/cloudinary-config");
+const { uploadToCloudinary, deleteFromCloudinary } = require("../../../midlewares/cloudinary-config");
 const BienModel = require("../../../models/Bien");
 const WantedModel = require("../../../models/Wanted");
 const crypto = require('crypto');
@@ -54,22 +54,28 @@ exports.deleteImageBien = async (req, res) => {
   }
 };
 
+// ✅ CORRECTION : Utiliser Cloudinary au lieu de AWS S3
 exports.imageWanted = async (req, res) => {
   const file = req.file;
   const data = req.body;
+  
   try {
-    const result = await uploadFile(file, "imagesWanted", generateRandomCode());
+    // Upload vers Cloudinary
+    const cloudinaryUrl = await uploadToCloudinary(file.path, 'marli-wanted');
     await unlink(file.path);
+    
     const newWanted = new WantedModel({
       title: data.title,
       caracteristiques: data.caracteristiques,
       history: data.history,
-      urlImage: result.key,
+      urlImage: cloudinaryUrl, // Stocker l'URL Cloudinary complète
     });
+    
     await newWanted.save();
-    res.status(200).json({ message: "Avis enregistré" });
+    res.status(200).json({ message: "Avis enregistré", url: cloudinaryUrl });
   } catch (error) {
-    res.status(500).json({ message: "Avis non enregistré" });
+    console.error('Erreur imageWanted:', error);
+    res.status(500).json({ message: "Avis non enregistré", error: error.message });
   }
 };
 
@@ -82,15 +88,23 @@ exports.getWanted = async (req, res) => {
   }
 };
 
+// ✅ CORRECTION : Supprimer de Cloudinary
 exports.deleteWanted = async (req, res) => {
-  const id = req.body.id;
-  const urlImage = req.body.urlImage;
+  const id = req.query.id || req.body.id;
+  const urlImage = req.query.key || req.body.urlImage;
+  
   try {
-    await deleteFile(urlImage, "imagesWanted");
+    // Si c'est une URL Cloudinary, la supprimer
+    if (urlImage && urlImage.startsWith('http')) {
+      await deleteFromCloudinary(urlImage);
+    }
+    // Sinon, c'est un ancien fichier S3 (on ignore, il n'existe plus de toute façon)
+    
     await WantedModel.deleteOne({ _id: id });
     res.status(200).json({ message: "Avis supprimé" });
   } catch (error) {
-    res.status(500).json({ message: "Avis non supprimé" });
+    console.error('Erreur deleteWanted:', error);
+    res.status(500).json({ message: "Avis non supprimé", error: error.message });
   }
 };
 
