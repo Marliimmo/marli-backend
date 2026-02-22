@@ -122,7 +122,7 @@ exports.deleteWanted = async (req, res) => {
 
 exports.updateMultipleImages = async (req, res) => {
   try {
-    const { reference } = req.body;
+    const { reference, keepUrls } = req.body;
     const files = req.files;
 
     if (!reference) {
@@ -134,15 +134,14 @@ exports.updateMultipleImages = async (req, res) => {
       return res.status(404).json({ message: "Bien non trouvé" });
     }
 
-    // RÉCUPÉRER LES IMAGES EXISTANTES DEPUIS LA BDD
-    const existing = [];
-    let i = 0;
-    while (bien._medias && bien._medias[`image_galerie_${i}`]) {
-      existing.push(bien._medias[`image_galerie_${i}`].url);
-      i++;
+    // URLs existantes à conserver (envoyées par le frontend)
+    let keptUrls = [];
+    if (keepUrls) {
+      try { keptUrls = JSON.parse(keepUrls); }
+      catch(e) { keptUrls = Array.isArray(keepUrls) ? keepUrls : [keepUrls]; }
     }
 
-    // UPLOADER LES NOUVELLES
+    // Uploader les nouvelles images
     const uploadedUrls = [];
     if (files && files.length > 0) {
       for (const file of files) {
@@ -152,23 +151,28 @@ exports.updateMultipleImages = async (req, res) => {
       }
     }
 
-    // COMBINER (existantes + nouvelles)
-    const allImages = [...existing, ...uploadedUrls];
+    // Images finales = gardées + nouvelles
+    const allImages = [...keptUrls, ...uploadedUrls];
 
-    // SAUVEGARDER
-    const updateData = {};
-    allImages.forEach((url, index) => {
-      updateData[`_medias.image_galerie_${index}`] = { url };
-    });
+    // Compter les anciens slots
+    let oldCount = 0;
+    while (bien._medias && bien._medias[`image_galerie_${oldCount}`]) oldCount++;
 
-    await BienModel.updateOne({ ref: reference }, { $set: updateData });
+    // Construire $set et $unset
+    const setData = {};
+    const unsetData = {};
+    allImages.forEach((url, index) => { setData[`_medias.image_galerie_${index}`] = { url }; });
+    for (let j = allImages.length; j < oldCount; j++) { unsetData[`_medias.image_galerie_${j}`] = ""; }
 
-    res.status(200).json({
-      message: "Images enregistrées avec succès",
-      images: allImages
-    });
+    const updateOp = { $set: setData };
+    if (Object.keys(unsetData).length > 0) updateOp.$unset = unsetData;
+
+    await BienModel.updateOne({ ref: reference }, updateOp);
+
+    res.status(200).json({ message: "Images enregistrées avec succès", images: allImages });
   } catch (error) {
     console.error('Erreur upload:', error);
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+
