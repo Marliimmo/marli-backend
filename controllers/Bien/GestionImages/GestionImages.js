@@ -122,7 +122,7 @@ exports.deleteWanted = async (req, res) => {
 
 exports.updateMultipleImages = async (req, res) => {
   try {
-    const { reference, existingImages } = req.body;
+    const { reference } = req.body;
     const files = req.files;
 
     if (!reference) {
@@ -134,8 +134,15 @@ exports.updateMultipleImages = async (req, res) => {
       return res.status(404).json({ message: "Bien non trouvé" });
     }
 
-    const existing = existingImages ? JSON.parse(existingImages) : [];
+    // RÉCUPÉRER LES IMAGES EXISTANTES DEPUIS LA BDD
+    const existing = [];
+    let i = 0;
+    while (bien._medias && bien._medias[`image_galerie_${i}`]) {
+      existing.push(bien._medias[`image_galerie_${i}`].url);
+      i++;
+    }
 
+    // UPLOADER LES NOUVELLES
     const uploadedUrls = [];
     if (files && files.length > 0) {
       for (const file of files) {
@@ -145,8 +152,10 @@ exports.updateMultipleImages = async (req, res) => {
       }
     }
 
+    // COMBINER (existantes + nouvelles)
     const allImages = [...existing, ...uploadedUrls];
 
+    // SAUVEGARDER
     const updateData = {};
     allImages.forEach((url, index) => {
       updateData[`_medias.image_galerie_${index}`] = { url };
