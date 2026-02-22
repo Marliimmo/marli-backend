@@ -44,13 +44,25 @@ exports.updateImagesBien = async (req, res) => {
 };
 
 exports.deleteImageBien = async (req, res) => {
-  const key = req.params.key;
-  const repertoire = req.params.repertoire;
+  const imageUrl = req.params.key;
+  const index = req.query.index;
+  const reference = req.query.ref;
+  
   try {
-    await deleteFile(key, repertoire);
-    res.status(200).json({ message: "Image supprimé" });
+    if (imageUrl && imageUrl.startsWith("http")) {
+      await deleteFromCloudinary(imageUrl);
+    }
+    
+    if (reference && index !== undefined) {
+      const updateData = {};
+      updateData[`_medias.image_galerie_${index}`] = null;
+      await BienModel.updateOne({ ref: reference }, { $unset: updateData });
+    }
+    
+    res.status(200).json({ message: "Image supprimée" });
   } catch (error) {
-    res.status(500).json({ message: "Image non supprimé" });
+    console.error("Erreur deleteImageBien:", error);
+    res.status(500).json({ message: "Image non supprimée", error: error.message });
   }
 };
 
