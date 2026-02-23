@@ -123,7 +123,7 @@ exports.deleteWanted = async (req, res) => {
 exports.updateMultipleImages = async (req, res) => {
   try {
     const { reference, keepUrls } = req.body;
-    const files = req.files;
+    const files = req.files ? req.files.filter(f => f.fieldname === "images") : [];
 
     if (!reference) {
       return res.status(400).json({ message: "Référence manquante" });
