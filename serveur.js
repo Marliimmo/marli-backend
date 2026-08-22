@@ -16,7 +16,6 @@ const articleRouteur = require("./routes/Article/ArticleRoutes");
 const mongoose = require("mongoose");
 
 const mongoURI = process.env.MONGODB_URI;
-console.log('MongoDB URI:', mongoURI);
 
 mongoose.connect(mongoURI)
   .then(() => console.log('Connexion à MongoDB réussie !'))
@@ -49,8 +48,8 @@ const corsOptions = {
   allowedHeaders: 'Content-Type,Authorization',
 };
 
-app.use(bodyParser.json({ limit: "10000mb" }));
-app.use(bodyParser.urlencoded({ limit: "10000mb", extended: true }));
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
