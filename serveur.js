@@ -38,7 +38,12 @@ const corsOptions = {
       'https://marli-dashboard.vercel.app'
     ];
     
-    if (!origin || allowed.includes(origin) || origin.includes('.vercel.app')) {
+    // Autorise les déploiements de prévisualisation Vercel de TES projets uniquement
+    // (ex: front-marli-git-ma-branche-marliimmo.vercel.app), plus la liste fixe ci-dessus.
+    // Avant, n'importe quel site déployé sur vercel.app (même d'un inconnu) était autorisé.
+    const isOwnVercelPreview = origin && /^https:\/\/(front-marli|marli-dashboard)[a-z0-9-]*\.vercel\.app$/.test(origin);
+
+    if (!origin || allowed.includes(origin) || isOwnVercelPreview) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
