@@ -111,6 +111,9 @@ const bienSchema = mongoose.Schema({
         image_galerie_30: {
             url : {type: String}
         },
+        video_bien: {
+            url : {type: String}
+        },
     }
 });
 

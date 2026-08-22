@@ -47,22 +47,27 @@ exports.deleteImageBien = async (req, res) => {
   const imageUrl = req.params.key;
   const index = req.query.index;
   const reference = req.query.ref;
-  
+  // "field" est optionnel : chemin Mongo complet (ex: _medias.video_bien) pour supprimer
+  // un média qui n'est pas indexé comme la galerie (ex: la vidéo). Si absent, comportement
+  // inchangé (suppression d'une image de galerie via son index).
+  const field = req.query.field;
+
   try {
     if (imageUrl && imageUrl.startsWith("http")) {
       await deleteFromCloudinary(imageUrl);
     }
-    
-    if (reference && index !== undefined) {
+
+    if (reference && (field || index !== undefined)) {
       const updateData = {};
-      updateData[`_medias.image_galerie_${index}`] = null;
+      const targetField = field || `_medias.image_galerie_${index}`;
+      updateData[targetField] = null;
       await BienModel.updateOne({ ref: reference }, { $unset: updateData });
     }
-    
-    res.status(200).json({ message: "Image supprimée" });
+
+    res.status(200).json({ message: "Média supprimé" });
   } catch (error) {
     console.error("Erreur deleteImageBien:", error);
-    res.status(500).json({ message: "Image non supprimée", error: error.message });
+    res.status(500).json({ message: "Média non supprimé", error: error.message });
   }
 };
 
