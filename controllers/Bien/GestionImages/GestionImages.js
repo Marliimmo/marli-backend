@@ -33,9 +33,7 @@ exports.updateImagesBien = async (req, res) => {
   const nomDeLaPropiete = req.body.nomDeLaPropiete;
   const reference = req.body.reference;
   try {
-    const cloudinaryUrl = await uploadToCloudinary(file.path, 'marli-biens');
-    await unlink(file.path);
-    const data = { [nomDeLaPropiete]: { url: cloudinaryUrl } };
+    const cloudinaryUrl = await uploadToCloudinary(file.path, 'marli-biens', file.mimetype);
     await BienModel.updateOne({ ref: reference }, data);
     res.status(200).json({ message: "Image enregistrée", result: cloudinaryUrl });
   } catch (error) {
@@ -78,7 +76,7 @@ exports.imageWanted = async (req, res) => {
   
   try {
     // Upload vers Cloudinary
-    const cloudinaryUrl = await uploadToCloudinary(file.path, 'marli-wanted');
+    const cloudinaryUrl = await uploadToCloudinary(file.path, 'marli-wanted', file.mimetype);
     await unlink(file.path);
     
     const newWanted = new WantedModel({
@@ -146,13 +144,21 @@ exports.updateMultipleImages = async (req, res) => {
       catch(e) { keptUrls = Array.isArray(keepUrls) ? keepUrls : [keepUrls]; }
     }
 
-    // Uploader les nouvelles images
+    // Uploader les nouvelles images (chaque fichier est indépendant : si l'un échoue,
+    // les autres sont quand même enregistrés au lieu de tout annuler)
     const uploadedUrls = [];
+    const failedFiles = [];
     if (files && files.length > 0) {
       for (const file of files) {
-        const cloudinaryUrl = await uploadToCloudinary(file.path, 'marli-biens');
-        await unlink(file.path);
-        uploadedUrls.push(cloudinaryUrl);
+        try {
+          const cloudinaryUrl = await uploadToCloudinary(file.path, 'marli-biens', file.mimetype);
+          uploadedUrls.push(cloudinaryUrl);
+        } catch (fileError) {
+          console.error(`Échec upload pour ${file.originalname}:`, fileError.message);
+          failedFiles.push(file.originalname);
+        } finally {
+          if (fs.existsSync(file.path)) await unlink(file.path);
+        }
       }
     }
 
@@ -174,7 +180,15 @@ exports.updateMultipleImages = async (req, res) => {
 
     await BienModel.updateOne({ ref: reference }, updateOp);
 
-    res.status(200).json({ message: "Images enregistrées avec succès", images: allImages });
+    if (failedFiles.length > 0) {
+      res.status(200).json({
+        message: `${uploadedUrls.length} image(s) enregistrée(s), mais ${failedFiles.length} ont échoué : ${failedFiles.join(', ')}`,
+        images: allImages,
+        failedFiles,
+      });
+    } else {
+      res.status(200).json({ message: "Images enregistrées avec succès", images: allImages });
+    }
   } catch (error) {
     console.error('Erreur upload:', error);
     res.status(500).json({ message: "Erreur serveur", error: error.message });
