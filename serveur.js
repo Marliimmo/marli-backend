@@ -4,6 +4,7 @@ const http = require('http');
 const path = require('path');
 const bodyParser = require("body-parser");
 const app = express();
+app.get("/health", (req, res) => res.status(200).send("ok"));
 const server = http.createServer(app);
 const port = process.env.PORT || 8090;
 const userRouteur = require("./routes/User/UserLog/user");
