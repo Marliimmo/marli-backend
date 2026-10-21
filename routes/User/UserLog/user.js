@@ -23,6 +23,7 @@ router.post('/login', loginLimiter, ctrlUser.login);
 router.get('/tk-log', auth, ctrlUser.tk_log);
 // router.post('/add-review', upload.single("photo"), ctrlUser.addReview);
 router.post('/add-review', reviewLimiter, honeypot, ctrlUser.addReview);
+router.post('/admin-review', auth, ctrlUser.adminAddReview);
 router.get('/reviews', optionalAuth, ctrlUser.getReviews);
 router.patch('/validation-review', auth, ctrlUser.validationReview);
 router.delete('/delete-review/:id', auth, ctrlUser.deleteReview);

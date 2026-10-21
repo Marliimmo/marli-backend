@@ -87,6 +87,30 @@ exports.addReview = async (req, res, next) => {
   }
 }
 
+// ajout d'un avis depuis le dashboard (avis reçu par téléphone, e-mail, Google...)
+// Réservé à l'administratrice connectée ; publié directement sauf si "publier" vaut false.
+const AVATARS = ['women_1', 'women_2', 'women_3', 'men_1', 'men_2', 'men_3'];
+exports.adminAddReview = async (req, res, next) => {
+  const pseudo = str(req.body?.pseudo, 60);
+  const description = str(req.body?.description, 2000);
+  const stars = parseInt(req.body?.stars, 10);
+  const urlImage = AVATARS.includes(req.body?.urlImage) ? req.body.urlImage : 'women_1';
+  if (!pseudo || !description || !(stars >= 1 && stars <= 5)) {
+    return res.status(400).json({ message: "Nom, avis et note (1 à 5) obligatoires" });
+  }
+  try {
+    const avis = new UserAvisModel({
+      pseudo, description, stars, urlImage,
+      status: req.body?.publier === false ? 'not-valid' : 'valid',
+    });
+    await avis.save();
+    return res.status(201).json({ message: 'Avis ajouté' });
+  } catch (error) {
+    console.error("adminAddReview:", error);
+    return res.status(500).json({ message: 'Erreur serveur' });
+  }
+}
+
 // get de tous les avis client
 // La vue complète (avis non validés compris) est réservée au dashboard connecté.
 exports.getReviews = async (req, res, next) => {
