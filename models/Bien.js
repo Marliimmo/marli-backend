@@ -1,11 +1,8 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require("mongoose-unique-validator");
 
-const currentDate = new Date();
-const options = { year: 'numeric', month: 'short' };
-
-// Convertissez la date actuelle en français
-const dateDeCrea = currentDate.toLocaleDateString('fr-FR', options);
+// Date de création calculée à chaque nouveau bien (avant : figée au démarrage du serveur)
+const dateDeCrea = () => new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'short' });
 
 const bienSchema = mongoose.Schema({ 
     status: {type: String, required: true, default: "non-disponible"},

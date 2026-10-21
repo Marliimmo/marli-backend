@@ -8,6 +8,14 @@ const util = require('util');
 const unlink = util.promisify(fs.unlink)
 
 const crypto = require('crypto');
+const { str, escapeHtml } = require("../../../midlewares/security");
+
+// Comparaison à temps constant (évite de deviner l'identifiant caractère par caractère)
+const safeEqual = (a, b) => {
+  const ha = crypto.createHash('sha256').update(String(a ?? '')).digest();
+  const hb = crypto.createHash('sha256').update(String(b ?? '')).digest();
+  return crypto.timingSafeEqual(ha, hb);
+};
 
 // Création d'un code aléatoire unique 
 const generateRandomCode = () => {
@@ -31,7 +39,9 @@ exports.login = (req, res, next) =>{
   const pseudoUser = req?.body?.pseudo
   const keyAccess = req?.body?.password
 
-  if((pseudoUser === process.env.PSEUDO_ACCES_DASHBORD) && (keyAccess === process.env.KEY_ACCES_DASHBORD)){
+  const okPseudo = safeEqual(pseudoUser, process.env.PSEUDO_ACCES_DASHBORD);
+  const okKey = safeEqual(keyAccess, process.env.KEY_ACCES_DASHBORD);
+  if(process.env.PSEUDO_ACCES_DASHBORD && process.env.KEY_ACCES_DASHBORD && okPseudo && okKey){
     return res.status(200).json({
       pseudo : pseudoUser,
       token : jwt.sign(
@@ -51,45 +61,47 @@ exports.tk_log = async (req, res, next) => {
 }
 
 // ajout d'un avis client
+// Seuls les champs attendus sont acceptés : le statut reste toujours "not-valid"
+// (un visiteur ne peut plus publier son avis sans modération).
 exports.addReview = async (req, res, next) => {
-  const dataBody = {...req.body};
-  // const file = req?.file;
-  // let result;
+  const pseudo = str(req.body?.pseudo, 60);
+  const description = str(req.body?.description, 2000);
+  const stars = parseInt(req.body?.stars, 10);
+  const urlImage = str(req.body?.urlImage, 300);
 
-  // if(file){
-  //   const codeUnique = generateRandomCode();
-  //   result = await uploadFile(file, 'userAvis', codeUnique);
-  //   await unlink(file.path);
-  // }
+  if (!pseudo || !description || !(stars >= 1 && stars <= 5)) {
+    return res.status(400).json({ message: "Pseudo, avis et note (1 à 5) obligatoires" });
+  }
+  if (urlImage && /^\s*javascript:/i.test(urlImage)) {
+    return res.status(400).json({ message: "Image invalide" });
+  }
 
   try {
-    const newAvis = new UserAvisModel({
-      ...dataBody,
-      // urlImage : result?.key ? result.key : null
-    })
-
+    const newAvis = new UserAvisModel({ pseudo, description, stars, urlImage: urlImage || undefined });
     await newAvis.save();
-    await reviewUserNotif(dataBody.pseudo, dataBody.stars, dataBody.description)
+    await reviewUserNotif(escapeHtml(pseudo), stars, escapeHtml(description));
     return res.status(200).json({message: 'Avis ajouté avec succès'});
   } catch (error) {
-    return res.status(500).json({message: 'Erreur serveur', error});
+    console.error("addReview:", error);
+    return res.status(500).json({message: 'Erreur serveur'});
   }
 }
 
 // get de tous les avis client
+// La vue complète (avis non validés compris) est réservée au dashboard connecté.
 exports.getReviews = async (req, res, next) => {
-  const allReviews = req.query.allreviews
+  const allReviews = req.query.allreviews && req.isAdmin
   try {
     const reviews = await UserAvisModel.find(allReviews ? {} : {status: "valid"}).select("-__v -dateAdd")
     .sort({_id : -1});
     return res.status(200).json(reviews);
   } catch (error) {
-    return res.status(500).json({message: 'Erreur serveur', error})
+    return res.status(500).json({message: 'Erreur serveur'})
   }
 }
 
 exports.deleteReview = async (req, res, next) => {
-  const id = req.params.id; 
+  const id = str(req.params.id, 40);
 
   try {
     const review = await UserAvisModel.findOne({ _id: id });
@@ -106,8 +118,11 @@ exports.deleteReview = async (req, res, next) => {
 
 
 exports.validationReview = async (req, res, next) => {
-  const status = req.query.status;
-  const id = req.query.id;
+  const status = str(req.query.status, 20);
+  const id = str(req.query.id, 40);
+  if (!["valid", "not-valid"].includes(status)) {
+    return res.status(400).json({ message: "Statut invalide" });
+  }
 
   try {
     const review = await UserAvisModel.findOne({_id : id});

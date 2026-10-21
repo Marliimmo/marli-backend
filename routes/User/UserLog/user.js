@@ -4,6 +4,7 @@ const auth = require("../../../midlewares/auth/auth");
 const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
+const { reviewLimiter, honeypot, optionalAuth } = require('../../../midlewares/security');
 
 // const multer = require("multer");
 // const upload = multer({dest: "uploads/"});
@@ -21,8 +22,8 @@ const loginLimiter = rateLimit({
 router.post('/login', loginLimiter, ctrlUser.login);
 router.get('/tk-log', auth, ctrlUser.tk_log);
 // router.post('/add-review', upload.single("photo"), ctrlUser.addReview);
-router.post('/add-review', ctrlUser.addReview);
-router.get('/reviews', ctrlUser.getReviews);
+router.post('/add-review', reviewLimiter, honeypot, ctrlUser.addReview);
+router.get('/reviews', optionalAuth, ctrlUser.getReviews);
 router.patch('/validation-review', auth, ctrlUser.validationReview);
 router.delete('/delete-review/:id', auth, ctrlUser.deleteReview);
 

@@ -3,11 +3,12 @@ const ctrlUser = require("../../../controllers/Bien/GestionBien/GestionBien");
 const auth = require("../../../midlewares/auth/auth");
 
 const router = express.Router();
+const { optionalAuth } = require('../../../midlewares/security');
 
 router.post('/create', auth, ctrlUser.createNewBien);
 router.patch('/update', auth, ctrlUser.updateBien);
 router.delete('/delete', auth, ctrlUser.deleteBien);
 router.get('/get-one', ctrlUser.getBien);
-router.get('/all-biens', ctrlUser.getAllBien);
+router.get('/all-biens', optionalAuth, ctrlUser.getAllBien);
 
 module.exports = router;

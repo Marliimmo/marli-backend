@@ -6,6 +6,10 @@ const { uploadToCloudinary, deleteFromCloudinary } = require("../../../midleware
 const BienModel = require("../../../models/Bien");
 const WantedModel = require("../../../models/Wanted");
 const crypto = require('crypto');
+const { str } = require("../../../midlewares/security");
+
+// Dossiers de l'ancien stockage S3 pouvant être lus publiquement
+const REPERTOIRES_PUBLICS = ['imagesBienMarli', 'imagesWanted', 'userAvis', 'imagesPages'];
 
 const generateRandomCode = () => {
     const currentDate = new Date();
@@ -19,8 +23,11 @@ const generateRandomCode = () => {
 };
 
 exports.getImagesPath = async (req, res) =>{
-  const key = req.params.key;
-  const repertoire = req.params.repertoire;
+  const key = str(req.params.key, 300);
+  const repertoire = str(req.params.repertoire, 50);
+  if (!REPERTOIRES_PUBLICS.includes(repertoire) || !/^[\w.\-]+$/.test(key)) {
+    return res.status(404).json({message: "Aucune Image"})
+  }
   const readStream = await getFileStream(key, repertoire);
   if(!readStream){
     return res.status(404).json({message: "Aucune Image"})
@@ -30,14 +37,29 @@ exports.getImagesPath = async (req, res) =>{
 
 exports.updateImagesBien = async (req, res) => {
   const file = req.file;
-  const nomDeLaPropiete = req.body.nomDeLaPropiete;
-  const reference = req.body.reference;
+  const nomDeLaPropiete = str(req.body.nomDeLaPropiete, 40);
+  const reference = str(req.body.reference, 20);
+
+  // Correctif : la fonction utilisait une variable "data" inexistante, l'image partait sur
+  // Cloudinary puis la requête échouait sans rien enregistrer.
+  if (!file) return res.status(400).json({ error: "Aucun fichier reçu" });
+  if (!reference || !/^(image_galerie_\d{1,2}|video_bien)$/.test(nomDeLaPropiete)) {
+    if (fs.existsSync(file.path)) await unlink(file.path);
+    return res.status(400).json({ error: "Référence ou emplacement d'image invalide" });
+  }
   try {
     const cloudinaryUrl = await uploadToCloudinary(file.path, 'marli-biens', file.mimetype);
-    await BienModel.updateOne({ ref: reference }, data);
+    const result = await BienModel.updateOne(
+      { ref: reference },
+      { $set: { [`_medias.${nomDeLaPropiete}.url`]: cloudinaryUrl } }
+    );
+    if (result.matchedCount === 0) return res.status(404).json({ error: "Bien non trouvé" });
     res.status(200).json({ message: "Image enregistrée", result: cloudinaryUrl });
   } catch (error) {
+    console.error("updateImagesBien:", error);
     res.status(500).json({ error: "Une erreur s'est produite lors de l'enregistrement de l'image." });
+  } finally {
+    if (fs.existsSync(file.path)) await unlink(file.path);
   }
 };
 
@@ -48,7 +70,10 @@ exports.deleteImageBien = async (req, res) => {
   // "field" est optionnel : chemin Mongo complet (ex: _medias.video_bien) pour supprimer
   // un média qui n'est pas indexé comme la galerie (ex: la vidéo). Si absent, comportement
   // inchangé (suppression d'une image de galerie via son index).
-  const field = req.query.field;
+  const field = req.query.field ? str(req.query.field, 60) : undefined;
+  if (field && !/^_medias\.\w+$/.test(field)) {
+    return res.status(400).json({ message: "Champ de média invalide" });
+  }
 
   try {
     if (imageUrl && imageUrl.startsWith("http")) {
@@ -73,11 +98,12 @@ exports.deleteImageBien = async (req, res) => {
 exports.imageWanted = async (req, res) => {
   const file = req.file;
   const data = req.body;
+  if (!file) return res.status(400).json({ message: "Aucune image reçue" });
   
   try {
     // Upload vers Cloudinary
     const cloudinaryUrl = await uploadToCloudinary(file.path, 'marli-wanted', file.mimetype);
-    await unlink(file.path);
+    if (fs.existsSync(file.path)) await unlink(file.path);
     
     const newWanted = new WantedModel({
       title: data.title,
