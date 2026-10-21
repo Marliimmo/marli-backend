@@ -37,7 +37,8 @@ exports.getImagesPath = async (req, res) =>{
 
 exports.updateImagesBien = async (req, res) => {
   const file = req.file;
-  const nomDeLaPropiete = str(req.body.nomDeLaPropiete, 40);
+  // Le dashboard envoie "_medias.image_galerie_3" ou "_medias.video_bien"
+  const nomDeLaPropiete = str(req.body.nomDeLaPropiete, 40).replace(/^_medias\./, '');
   const reference = str(req.body.reference, 20);
 
   // Correctif : la fonction utilisait une variable "data" inexistante, l'image partait sur
