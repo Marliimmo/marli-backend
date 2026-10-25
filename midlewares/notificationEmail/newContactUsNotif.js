@@ -8,7 +8,9 @@ function NewContactUser (titleMessage, motif, name, email, phone, contenu) {
         const mail_configs = {
             from: '"Marli, passeur d\'histoires immobilières" <support@marli-immobilier.com>',
             to: `${process.env.EMAIL_ADMIN}`,
-            subject: `Nouveau mail nous-contacter`,
+            subject: `Nouveau message de ${name} (Nous contacter)`,
+            // « Répondre » dans la messagerie écrit directement à l'internaute
+            replyTo: email,
             html: `
                 <div style="font-family: Montserrat, poppins, sans-serif">
                     <p>Titre du message : ${titleMessage}</p>
@@ -38,15 +40,15 @@ function notifForUser (email, name) {
         const mail_configs = {
             from: '"Marli, passeur d\'histoires immobilières" <support@marli-immobilier.com>',
             to: email,
-            subject: "no-reply",
+            subject: "Marli Immobilier : nous avons bien reçu votre message",
             html: `
-                <div style="font-family: Montserrat, poppins, sans-serif">
-                    <p>Bonjour ${name}</p>
-
-                    <p>Nous vous confirmons avoir bien reçu votre mail, nous prendons contact avec vous dans un plus bref délais.</p>
-                    <p>Ceci est un mail automatique, merci de ne pas y répondre.</p>
-
-                    <p>Marli - Passeur d'histoire immobilières</p>
+                <div style="font-family: Montserrat, Poppins, Arial, sans-serif; color: #222; line-height: 1.6">
+                    <p>Bonjour ${name},</p>
+                    <p>Merci pour votre message. Nous l'avons bien reçu et nous revenons vers vous dans les plus brefs délais.</p>
+                    <p>Pour toute question urgente, vous pouvez joindre Néné Mar au 06 88 74 06 21.</p>
+                    <p>Ce message est envoyé automatiquement, merci de ne pas y répondre.</p>
+                    <p>Marli Immobilier, passeur d'histoires immobilières<br>
+                    <a href="https://marli-immobilier.com">marli-immobilier.com</a></p>
                 </div>
             `
         }

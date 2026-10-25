@@ -21,10 +21,11 @@ exports.reviewLimiter = rateLimit({
   message: { message: "Trop d'avis envoyés depuis cette connexion, réessayez plus tard." },
 });
 
-// Champ piège invisible ("website") : un humain ne le remplit jamais, un robot si.
-// On répond "succès" sans rien faire pour ne pas renseigner le robot.
+// Champ piège invisible ("hp_marli") : un humain ne le remplit jamais, un robot si.
+// Nom choisi pour ne jamais être prérempli par la saisie automatique des navigateurs
+// (l'ancien nom "website" pouvait l'être). On répond "succès" sans rien faire.
 exports.honeypot = (req, res, next) => {
-  if (req.body && typeof req.body.website === "string" && req.body.website.trim() !== "") {
+  if (req.body && typeof req.body.hp_marli === "string" && req.body.hp_marli.trim() !== "") {
     return res.status(200).json({ message: "message envoyé avec succès" });
   }
   next();

@@ -8,7 +8,9 @@ function wantedUser ( localisation, typeBien, superficie, pieces, budget, name, 
         const mail_configs = {
             from: '"Marli, passeur d\'histoires immobilières" <support@marli-immobilier.com>',
             to: `${process.env.EMAIL_ADMIN}`,
-            subject: `Avis de recherche`,
+            subject: `Avis de recherche de ${name}`,
+            // « Répondre » dans la messagerie écrit directement à l'internaute
+            replyTo: email,
             html: `
                 <div style="font-family: Montserrat, poppins, sans-serif">
                     <p>Emplacement / Localisation : ${localisation}</p>
@@ -41,16 +43,15 @@ function notifForUserWanted (email, name) {
         const mail_configs = {
             from: '"Marli, passeur d\'histoires immobilières" <support@marli-immobilier.com>',
             to: email,
-            subject: "no-reply",
+            subject: "Marli Immobilier : nous avons bien reçu votre recherche",
             html: `
-                <div style="font-family: Montserrat, poppins, sans-serif">
-                    <p>Bonjour ${name}</p>
-
-                    <p>Nous vous confirmons avoir bien reçu votre demande d'avis de recherche, nous prendons contact avec vous dans un plus bref délais.</p>
-                    <p>Ceci est un mail automatique, merci de ne pas y répondre.</p>
-
-                    <p>Marli - Passeur d'histoire immobilières</p>
-
+                <div style="font-family: Montserrat, Poppins, Arial, sans-serif; color: #222; line-height: 1.6">
+                    <p>Bonjour ${name},</p>
+                    <p>Merci pour votre avis de recherche. Nous l'avons bien reçu et nous revenons vers vous dans les plus brefs délais.</p>
+                    <p>Pour toute question urgente, vous pouvez joindre Néné Mar au 06 88 74 06 21.</p>
+                    <p>Ce message est envoyé automatiquement, merci de ne pas y répondre.</p>
+                    <p>Marli Immobilier, passeur d'histoires immobilières<br>
+                    <a href="https://marli-immobilier.com">marli-immobilier.com</a></p>
                 </div>
             `
         }

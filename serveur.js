@@ -15,8 +15,6 @@ const userRouteur = require("./routes/User/UserLog/user");
 const imagesBienRouteur = require("./routes/Bien/GestionImages/GestionImages");
 const bienRouteur = require("./routes/Bien/GestionBien/GestionBien");
 const formNotifRouteur = require("./routes/FormNotif/FormNotif");
-const pageRoutes = require("./routes/SiteConfig/pageRoutes");
-const pageImageRoutes = require('./routes/pageImageRoutes');
 const articleRouteur = require("./routes/Article/ArticleRoutes");
 const mongoose = require("mongoose");
 
@@ -76,9 +74,7 @@ app.use('/user', [userRouteur]);
 app.use('/bien', [bienRouteur, imagesBienRouteur]);
 app.use('/form', [formNotifRouteur]);
 app.use('/medias', express.static(path.join(__dirname, 'medias')));
-app.use('/pages', pageRoutes);
 app.use('/article', articleRouteur);
-app.use('/page-images', pageImageRoutes);
 app.use('/uploads', express.static('uploads'));
 app.use('/imagesWanted', express.static(path.join(__dirname, 'imagesWanted')));
 
