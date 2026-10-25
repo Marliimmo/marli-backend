@@ -79,7 +79,8 @@ exports.addReview = async (req, res, next) => {
   try {
     const newAvis = new UserAvisModel({ pseudo, description, stars, urlImage: urlImage || undefined });
     await newAvis.save();
-    await reviewUserNotif(escapeHtml(pseudo), stars, escapeHtml(description));
+    await reviewUserNotif(escapeHtml(pseudo), stars, escapeHtml(description))
+      .catch((e) => console.error('notification avis :', e));
     return res.status(200).json({message: 'Avis ajouté avec succès'});
   } catch (error) {
     console.error("addReview:", error);

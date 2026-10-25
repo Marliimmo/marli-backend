@@ -24,7 +24,8 @@ exports.contactUs = async (req, res, next) =>{
     if (!who || !d.contenu) return res.status(400).json({ message: "Nom, e-mail valide et message obligatoires" });
     try {
         await NewContactUser(d.titleMessage, d.motif, who.name, escapeHtml(who.email), d.phone, d.contenu);
-        await notifForUser(who.email, who.name);
+        // L'accusé de réception au visiteur ne doit pas faire échouer l'envoi principal
+        await notifForUser(who.email, who.name).catch((e) => console.error("accusé de réception :", e));
         return res.status(200).json({message: "message envoyé avec succès"});
     } catch (error) {
         console.error("contactUs:", error);
@@ -38,7 +39,8 @@ exports.wanted = async (req, res, next) =>{
     if (!who) return res.status(400).json({ message: "Nom et e-mail valide obligatoires" });
     try {
         await wantedUser(d.localisation, d.typeBien, d.superficie, d.pieces, d.budget, who.name, escapeHtml(who.email), d.phone, d.message);
-        await notifForUserWanted(who.email, who.name);
+        // L'accusé de réception au visiteur ne doit pas faire échouer l'envoi principal
+        await notifForUserWanted(who.email, who.name).catch((e) => console.error("accusé de réception :", e));
         return res.status(200).json({message: "message envoyé avec succès"});
     } catch (error) {
         console.error("wanted:", error);
@@ -52,7 +54,8 @@ exports.selling = async (req, res, next) =>{
     if (!who) return res.status(400).json({ message: "Nom et e-mail valide obligatoires" });
     try {
         await sellingUser(d.localisation, d.typeBien, d.superficie, d.pieces, who.name, escapeHtml(who.email), d.phone, d.message);
-        await notifForUserSelling(who.email, who.name);
+        // L'accusé de réception au visiteur ne doit pas faire échouer l'envoi principal
+        await notifForUserSelling(who.email, who.name).catch((e) => console.error("accusé de réception :", e));
         return res.status(200).json({message: "message envoyé avec succès"});
     } catch (error) {
         console.error("selling:", error);

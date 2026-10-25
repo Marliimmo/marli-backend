@@ -1,20 +1,12 @@
 require('dotenv').config();
-const nodemailer = require("nodemailer");
+const { createTransport } = require("./mailer");
 
 // Notification avis de recherche a l'admin.
 function wantedUser ( localisation, typeBien, superficie, pieces, budget, name, email, phone, message){
     return new Promise((resolve, reject)=>{
-        var transporter = nodemailer.createTransport({
-            host: 'mail54.lwspanel.com',
-            port: 465,
-            secure: true,
-            auth:{
-                user: `${process.env.SEND_MAIL_USER}`,
-                pass: `${process.env.SEND_MAIL_PASSWORD}`
-            }
-        })
+        var transporter = createTransport()
         const mail_configs = {
-            from: '"Marli - Passeur d\'histoire immobilières" <support@marli-immobilier.com>',
+            from: '"Marli, passeur d\'histoires immobilières" <support@marli-immobilier.com>',
             to: `${process.env.EMAIL_ADMIN}`,
             subject: `Avis de recherche`,
             html: `
@@ -45,17 +37,9 @@ function wantedUser ( localisation, typeBien, superficie, pieces, budget, name, 
 // Notification à envoyer à l'auteur du message.
 function notifForUserWanted (email, name) {
     return new Promise((resolve, reject)=>{
-        var transporter = nodemailer.createTransport({
-            host: 'mail54.lwspanel.com',
-            port: 465,
-            secure: true,
-            auth:{
-                user: `${process.env.SEND_MAIL_USER}`,
-                pass: `${process.env.SEND_MAIL_PASSWORD}`
-            }
-        })
+        var transporter = createTransport()
         const mail_configs = {
-            from: '"Marli - Passeur d\'histoire immobilières" <support@marli-immobilier.com>',
+            from: '"Marli, passeur d\'histoires immobilières" <support@marli-immobilier.com>',
             to: email,
             subject: "no-reply",
             html: `

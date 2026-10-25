@@ -1,20 +1,12 @@
 require('dotenv').config();
-const nodemailer = require("nodemailer");
+const { createTransport } = require("./mailer");
 
 // Notification nouveau avis client a l'admin.
 function reviewUserNotif ( pseudo, stars, description){
     return new Promise((resolve, reject)=>{
-        var transporter = nodemailer.createTransport({
-            host: 'mail54.lwspanel.com',
-            port: 465,
-            secure: true,
-            auth:{
-                user: `${process.env.SEND_MAIL_USER}`,
-                pass: `${process.env.SEND_MAIL_PASSWORD}`
-            }
-        })
+        var transporter = createTransport()
         const mail_configs = {
-            from: '"Marli - Passeur d\'histoire immobilières" <support@marli-immobilier.com>',
+            from: '"Marli, passeur d\'histoires immobilières" <support@marli-immobilier.com>',
             to: `${process.env.EMAIL_ADMIN}`,
             subject: `Nouveau avis client`,
             html: `
