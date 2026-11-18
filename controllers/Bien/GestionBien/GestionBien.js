@@ -118,8 +118,12 @@ exports.getAllBien = async (req, res, next) => {
             const auto = groupe.filter((b) => !(b.index > 0)); // déjà du plus récent au plus ancien
             const places = groupe.filter((b) => b.index > 0).sort((a, b) => a.index - b.index);
             const liste = [...auto];
+            // deux biens à la même position : le plus récent d'abord, l'autre juste après
+            let dernier = -1;
             places.forEach((b) => {
-                liste.splice(Math.min(b.index - 1, liste.length), 0, b);
+                const rang = Math.min(Math.max(b.index - 1, dernier + 1), liste.length);
+                liste.splice(rang, 0, b);
+                dernier = rang;
             });
             return liste;
         };
