@@ -93,18 +93,15 @@ exports.getAllBien = async (req, res, next) => {
     if (!getAdmin && status) baseFilter.status = status === "non-disponible" ? "__aucun__" : status;
 
     try {
+        // _id est gardé pour connaître l'ordre de création, puis retiré de la réponse
         let biens = await BienModel.find(baseFilter)
-            .sort({ dateCrea: -1, index: 1 })
-            .select('-__v -dateCrea -_id');
+            .sort({ _id: -1 })
+            .select('-__v -dateCrea');
 
         // Filtre de surface appliqué AVANT la pagination (avant : après, d'où des pages incomplètes)
         if (!getAdmin && Number.isFinite(superficie)) {
             biens = biens.filter((b) => (surfaceDe(b.caracteristiques) ?? 0) >= superficie);
         }
-
-        const biensAvecIndex = biens.filter(bien => bien.index > 0).sort((a, b) => a.index - b.index);
-        const biensSansIndex = biens.filter(bien => !(bien.index > 0));
-        const allSortedByIndex = [...biensAvecIndex, ...biensSansIndex];
 
         const statusOrder = {
             'disponible': 0,
@@ -113,9 +110,32 @@ exports.getAllBien = async (req, res, next) => {
             'vendu': 3
         };
 
-        allSortedByIndex.sort((a, b) => {
-            return (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
+        // Ordre d'affichage, statut par statut :
+        // - par défaut, les biens les plus récemment créés en premier ;
+        // - un bien dont la « Position du bien » est renseignée dans le dashboard (index > 0)
+        //   est placé à ce rang (1 = premier), les autres se décalent.
+        const ordonner = (groupe) => {
+            const auto = groupe.filter((b) => !(b.index > 0)); // déjà du plus récent au plus ancien
+            const places = groupe.filter((b) => b.index > 0).sort((a, b) => a.index - b.index);
+            const liste = [...auto];
+            places.forEach((b) => {
+                liste.splice(Math.min(b.index - 1, liste.length), 0, b);
+            });
+            return liste;
+        };
+        const parStatut = {};
+        biens.forEach((b) => {
+            const cle = statusOrder[b.status] ?? 4;
+            (parStatut[cle] = parStatut[cle] || []).push(b);
         });
+        const allSortedByIndex = Object.keys(parStatut)
+            .sort((a, b) => a - b)
+            .flatMap((cle) => ordonner(parStatut[cle]))
+            .map((b) => {
+                const o = b.toObject();
+                delete o._id;
+                return o;
+            });
 
         const paginatedBiens = allSortedByIndex.slice(skip, skip + pageSize);
         const hasMore = (page * pageSize) < allSortedByIndex.length;
